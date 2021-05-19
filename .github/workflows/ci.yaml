@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: Git Ref (Optional)
+        required: false
+jobs:
+  tests:
+    # if: github.event.inputs.git-ref != '' # if you wanna to disable this instead of commenting...
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: globby-example
+        uses: actions/cache@v2
+        with:
+          path: |
+            ./.n*
+            ./build
+            ~/.m2/repository
+            !~/.m2/repository/com/gituhb/daggerok
+          key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm i -E
+      - run: npm t
